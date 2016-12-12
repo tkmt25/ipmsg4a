@@ -18,34 +18,13 @@ void sha1_hash(unsigned char *data, unsigned int datalen, unsigned char *digest)
   int i, t;
   unsigned int paddinglen = (((datalen + 9) + 63) & ~63); // 512bit境界に拡張.付加データ(9バイト)が収まらない場合も拡張
   int numOfBlocks = paddinglen / 64;
-  unsigned char *paddingdata = (unsigned char*)calloc(paddinglen, 1);
-
-  // 初期化
-  memcpy(paddingdata, data, datalen);
+  unsigned char block[64];
 
   // 付加データを作成
   /// 末尾に0x80を付加
-  paddingdata[datalen] = 0x80;
+  //paddingdata[datalen] = 0x80;
   /// 末尾に元メッセージのビット数を付加(8バイト)
   unsigned long long datalenBits = datalen * 8;
-  i = paddinglen - 8;
-  
-  paddingdata[i]   += (datalenBits >> 56) & 0xFF;
-  paddingdata[i+1] += (datalenBits >> 48) & 0xFF;
-  paddingdata[i+2] += (datalenBits >> 40) & 0xFF;
-  paddingdata[i+3] += (datalenBits >> 32) & 0xFF;
-  paddingdata[i+4] += (datalenBits >> 24) & 0xFF;
-  paddingdata[i+5] += (datalenBits >> 16) & 0xFF;
-  paddingdata[i+6] += (datalenBits >>  8) & 0xFF;
-  paddingdata[i+7] += (datalenBits )      & 0xFF;
-
-  for (i = 0; i < paddinglen; i+=16) {
-    printf("%08X : ", i);
-    for (int j = i; j < i+16; j++) {
-      printf("%02X ", paddingdata[j]);
-    }
-    printf("\n");
-  }
 
   const unsigned int K[] = {
     0x5A827999,    //  0-19
@@ -65,15 +44,48 @@ void sha1_hash(unsigned char *data, unsigned int datalen, unsigned char *digest)
   H[4] = 0xC3D2E1F0;
   memset(W, 0x00, sizeof(W));
 
+  bool isTerminated = false;
+  printf("datalen = %d\n", datalen);
+  printf("numOfBlocks = %d\n", numOfBlocks);
   for (i = 0; i < numOfBlocks; i++) {
-    unsigned char *bp = paddingdata + (i*64);
+    int dataIndex = i*64;
+    memset(block, 0x00, sizeof(block));
+
+    if (i == (numOfBlocks-1)) {
+      memcpy(block, &data[dataIndex], isTerminated ? 0 : datalen%64);
+      unsigned long long datalenBits = datalen * 8;
+      int j = sizeof(block) - 8;
+
+      block[j]   += (datalenBits >> 56) & 0xFF;
+      block[j+1] += (datalenBits >> 48) & 0xFF;
+      block[j+2] += (datalenBits >> 32) & 0xFF;
+      block[j+3] += (datalenBits >> 24) & 0xFF;
+      block[j+4] += (datalenBits >> 16) & 0xFF;
+      block[j+6] += (datalenBits >>  8) & 0xFF;
+      block[j+7] += (datalenBits      ) & 0xFF;
+    }else{
+      memcpy(block, &data[dataIndex], sizeof(block));
+    }
+
+    if ( IS_RANGE(datalen, dataIndex, dataIndex+63) ) {
+      block[datalen%64] = 0x80;
+      isTerminated = true;
+    }
+
+    for (int k = 0; k < 64; k+=16) {
+      printf("%08X : ", k);
+      for (int l = k; l < k+16; l++) {
+	printf("%02X  ", block[l]);
+      }
+      printf("\n");
+    }
 
     // 1-a
     for (t = 0; t < 16; t++) {
-      W[t]  = bp[t*4]   << 24;
-      W[t] |= bp[t*4+1] << 16;
-      W[t] |= bp[t*4+2] <<  8;
-      W[t] |= bp[t*4+3];
+      W[t]  = block[t*4]   << 24;
+      W[t] |= block[t*4+1] << 16;
+      W[t] |= block[t*4+2] <<  8;
+      W[t] |= block[t*4+3];
     }
 
     // 1-b
@@ -112,7 +124,6 @@ void sha1_hash(unsigned char *data, unsigned int datalen, unsigned char *digest)
     digest[4*i+2] = (H[i] >>  8) & 0xFF;
     digest[4*i+3] = (H[i])       & 0xFF;
   }
-  free(paddingdata);
 }
 
 
