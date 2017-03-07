@@ -18,3 +18,17 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+
+;grep
+(setq find-program "\"C:\\cygwin\\bin\\find.exe\""
+      grep-program "\"C:\\cygwin\\bin\\grep.exe\""
+      null-device "/dev/null")
+
+										;grepbuffer
+(defadvice grep (after my-grep activate)                              ;; grep実施後に実行
+  (let ((grep-buffer (get-buffer "*grep*")))                          ;; *grep*バッファをローカル変数に代入
+    (set-buffer grep-buffer)                                          ;; カレントバッファを*grep*バッファに設定
+    (rename-buffer (concat "*grep*" "<\"" (ad-get-arg 0) "\">" ) t)   ;; バッファ名をリネームする
+  )
+)
