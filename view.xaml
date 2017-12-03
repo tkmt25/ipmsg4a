@@ -1,0 +1,27 @@
+<Window 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Sample" 
+    FontFamily="consolas"
+    Height="500" 
+    Width="600"
+    Margin="5"
+    >
+  <DockPanel>
+    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+      <TextBox Name="text" Width="200"/>
+      <Button Name="button" Content="検索"  Height="30" Margin="5"/>
+    </StackPanel>
+    
+
+    <Grid>
+      <DataGrid Name="table" ScrollViewer.CanContentScroll="True">
+	<DataGrid.Columns>
+	  <DataGridTextColumn Header="発生時刻" Binding="{Binding TimeGenerated}" />
+	  <DataGridTextColumn Header="ID" Binding="{Binding EventID}" />
+	  <DataGridTextColumn Header="メッセージ" Binding="{Binding Message}" />
+	</DataGrid.Columns>
+      </DataGrid>
+    </Grid>
+  </DockPanel>
+</Window>
