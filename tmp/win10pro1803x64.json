@@ -1,0 +1,13 @@
+{
+    "vm_name": "win10pro1803x64",
+    "guest_os_type": "Windows10_64",
+    
+    "iso_url": "./iso/ja_windows_10_business_editions_version_1803_updated_march_2018_x64_dvd_12064243.iso",
+    "iso_checksum_type": "md5",
+    "iso_checksum": "070e51c4aafaf9b7d1dc82382e2c354a",
+    "autounattend": "./answer_files/win10_1803/Autounattend.xml",
+    
+    "cpus": "2",
+    "memory_size": "2048",
+    "disk_size": "61440"
+}
